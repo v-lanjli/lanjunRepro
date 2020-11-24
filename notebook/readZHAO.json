@@ -1,0 +1,29 @@
+{
+	"name": "readZHAO",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"df=spark.read.csv(\"abfss://testzhao@hozhaogen2.dfs.core.windows.net/test/ouput.csv/\",header=True)\n",
+					"df.show()"
+				],
+				"execution_count": null
+			}
+		]
+	}
+}

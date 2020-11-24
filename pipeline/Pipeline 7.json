@@ -1,0 +1,29 @@
+{
+	"name": "Pipeline 7",
+	"properties": {
+		"activities": [
+			{
+				"name": "00 Introduction to Azure Synapse Studio Notebooks",
+				"type": "SynapseNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "00 Introduction to Azure Synapse Studio Notebooks",
+						"type": "NotebookReference"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2020-04-17T05:48:16Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

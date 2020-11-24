@@ -1,0 +1,77 @@
+{
+	"name": "Write_Table_To_AzureSQL_1105",
+	"properties": {
+		"folder": {
+			"name": "test"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "scala"
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"//write csv to Azure SQL\n",
+					"//read csv\n",
+					"val blob_account_name = \"yifsoadlsgen2scus\"\n",
+					"val blob_container_name = \"testfs\"\n",
+					"val blob_relative_path = \"QingTestFolder/Persons22.csv\"  //sqlscripts_Persons.csv\n",
+					"val wasbs_path = s\"wasbs://${blob_container_name}@${blob_account_name}.blob.core.windows.net/${blob_relative_path}\"\n",
+					"spark.conf.set(\"fs.azure.account.key.yifsoadlsgen2scus.blob.core.windows.net\" , \"F6ACQdjDz0tA2JIknijEXa6f9HvOQvdVNgHhFy3QkJVpbZUeaybpCaagQc/qE0CRr2LUP76U0KM9wNs4XXMSJg==\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"//customSchema: org.apache.spark.sql.types.StructType\n",
+					"import org.apache.spark.sql._\n",
+					"import org.apache.spark.sql.types._\n",
+					"val customSchema = (new StructType).add(\"Id_P\",IntegerType,true).add(\"LastName\",StringType,true).add(\"FirstName\",StringType,true).add(\"Address\",StringType,true).add(\"City\",StringType,true)"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"//????CSV to DataFrame\n",
+					"// spark.read ? DataFrameReader.option ? DataFrameReader.schema ? DataFrameReader.csv ? DataFrame\n",
+					"val readDf = spark.read.option(\"header\", \"true\").option(\"delimiter\",\",\").schema(customSchema).csv(wasbs_path).groupBy(\"Id_P\").sum()\n",
+					"readDf.show"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"//????Create JDBC connection\n",
+					"val jdbcHostname = \"bigdataqa-1025.database.windows.net\"  //server name\n",
+					"val jdbcPort = 1433\n",
+					"val jdbcDatabase = \"sqlcompute\"\n",
+					"val jdbcUsername = \"zhao1234\"\n",
+					"val jdbcPassword = \"zhao/1234\"     \n",
+					"val jdbcUrl = s\"jdbc:sqlserver://${jdbcHostname}:${jdbcPort};database=${jdbcDatabase}\"\n",
+					"import java.util.Properties\n",
+					"val connectionProperties = new Properties()\n",
+					"connectionProperties.put(\"user\", s\"${jdbcUsername}\")\n",
+					"connectionProperties.put(\"password\", s\"${jdbcPassword}\")\n",
+					"\n",
+					"//Write Table to SQL Compute\n",
+					"readDf.write.jdbc(jdbcUrl, \"csvtable\", connectionProperties) //hvactable_hive temphvactable"
+				],
+				"execution_count": 6
+			}
+		]
+	}
+}

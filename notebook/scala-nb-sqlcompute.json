@@ -1,0 +1,186 @@
+{
+	"name": "scala-nb-sqlcompute",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "opendatalarge",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "scala"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/opendatalarge",
+				"name": "opendatalarge",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/opendatalarge",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 16,
+				"memory": 112
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"spark.conf"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"val jdbcHostname = \"westworkspace.database.windows.net\"\r\n",
+					"val jdbcPort = 1433\r\n",
+					"val jdbcDatabase = \"SQLcompute\"\r\n",
+					"val jdbcUsername = \"sqlAdminUser\"\r\n",
+					"val jdbcPassword = \"zhao/2017\"\r\n",
+					"val jdbcUrl = s\"jdbc:sqlserver://${jdbcHostname}:${jdbcPort};database=${jdbcDatabase}\"\r\n",
+					""
+				],
+				"attachments": null,
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"import java.util.Properties\r\n",
+					"val connectionProperties = new Properties()\r\n",
+					"connectionProperties.put(\"user\", s\"${jdbcUsername}\")\r\n",
+					"connectionProperties.put(\"password\", s\"${jdbcPassword}\")"
+				],
+				"attachments": null,
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"val driverClass = \"com.microsoft.sqlserver.jdbc.SQLServerDriver\"\r\n",
+					"connectionProperties.setProperty(\"Driver\", driverClass)"
+				],
+				"attachments": null,
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"val readsqldf = spark.read.jdbc(jdbcUrl, \"Persons\", connectionProperties)"
+				],
+				"attachments": null,
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val driverClass = \"com.microsoft.sqlserver.jdbc.SQLServerDriver\"\n",
+					"connectionProperties.setProperty(\"Driver\", driverClass)"
+				],
+				"attachments": null,
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val readsqldf = spark.read.jdbc(jdbcUrl, \"wwi.dimension_Customer\", connectionProperties)"
+				],
+				"attachments": null,
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"readsqldf.printSchema"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"readsqldf.show"
+				],
+				"attachments": null,
+				"execution_count": null
+			}
+		]
+	}
+}

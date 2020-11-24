@@ -1,0 +1,93 @@
+{
+	"name": "Azure Storage DotNet Test ZHAO",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "smalll",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "csharp"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/smalll",
+				"name": "smalll",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/smalll",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"var accessKey = @\"R5MDJQ0MuP4d6/GNMNDO/GdKPAjDEBWEOB5qCALeGsg2VhOuTeV4fNwp0FzaDvZPufwxiH5nwYewZl5zhDD+IQ==\";"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"var StorageAccount = \"beijingtestzhao\";"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"var configprop = \"fs.azure.account.key.\" + StorageAccount + \".blob.core.windows.net\";"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"var privateBlobSpark = SparkSession.Builder().AppName(\"Private Blob Spark\").Config(configprop, accessKey).GetOrCreate();"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"var people = privateBlobSpark.Read().Json(\"wasbs://zhaotest@beijingtestzhao.blob.core.windows.net/people.json\");"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"people.Show();"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"people.Write().Csv($\"wasbs://zhaotest@beijingtestzhao.blob.core.windows.net/people/WriteTest/{Guid.NewGuid().ToString()}\");"
+				],
+				"execution_count": 10
+			}
+		]
+	}
+}

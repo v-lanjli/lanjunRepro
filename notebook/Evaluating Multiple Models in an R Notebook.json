@@ -1,0 +1,478 @@
+{
+	"name": "Evaluating Multiple Models in an R Notebook",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"kernelspec": {
+				"name": "r",
+				"display_name": "R"
+			},
+			"language_info": {
+				"name": "python"
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Evaluating Multiple Models in an R Notebook\n",
+					"\n",
+					"##  Introduction\n",
+					"\n",
+					"The purpose of this example is to compare the performance of machine learning models within an R notebook. We will use the classic 1974 *Motor Trend* car road tests (`mtcars`) dataset to fit and evaluate three models:\n",
+					"1. A linear model using all variables\n",
+					"1. A linear model after variable selection\n",
+					"1. A Gradient Boosting Machine (GBM) model \n",
+					"\n",
+					"This is the R version of a [Python notebook](https://gallery.cortanaintelligence.com/Notebook/Evaluating-Multiple-Models-6) originally created by a Microsoft employee for distribution on the [Cortana Intelligence Gallery](https://gallery.cortanaintelligence.com/). A [lightly-modified version of the original Python notebook](https://notebooks.azure.com/library/eSJDgAFMXAY) is also available on Azure Notebooks.\n",
+					"\n",
+					"## Outline\n",
+					"\n",
+					"- [Introduction](#Introduction)\n",
+					"- [Prepare Data](#Prepare-Data)\n",
+					"- [Fit Models](#Fit-Models)\n",
+					"   - [Linear Model](#Linear-Model)\n",
+					"   - [Linear Model with Feature Selection](#Linear-Model-with-Feature-Selection)\n",
+					"   - [Gradient Boosting Machine Regression Model](#Gradient-Boosting-Machine-Regression-Model)\n",
+					"- [Conclusion](#Conclusion)"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Prepare Data\n",
+					"\n",
+					"We'll start by loading the `mtcars` sample dataset:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false,
+					"collapsed": true
+				},
+				"source": [
+					"data(mtcars)"
+				],
+				"attachments": null,
+				"execution_count": 1
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"There are eleven fields in this dataset:\n",
+					"1. `mpg`, the number of miles per gallon\n",
+					"1. `cyl`, the number of cylinders\n",
+					"1. `disp`, the engine displacement (volume swept by the cylinders) in cubic inches\n",
+					"1. `hp`, the gross horsepower\n",
+					"1. `drat`, the ratio of drive shaft rotations to rear axle rotations\n",
+					"1. `wt`, the car's weight in thousands of pounds\n",
+					"1. `qsec`, the fastest time in which the car can traverse 1/4 mile\n",
+					"1. `vs`, whether the car has a V engine or a straight engine\n",
+					"1. `am`, whether the car has an automatic or manual transmission\n",
+					"1. `gear`, number of forward gears\n",
+					"1. `carb`, number of carburetors\n",
+					"\n",
+					"A summary of their distributions and the first few records are shown below:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"summary(mtcars)\n",
+					"head(mtcars)"
+				],
+				"attachments": null,
+				"execution_count": 2
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"The goal for the machine learning models in this tutorial will be to predict each car's gas mileage (`mpg`) from the car's other features.\n",
+					"\n",
+					"We will split the records into training and test datasets: each model will be fitted using the training data, and evaluated using the withheld test data."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false,
+					"collapsed": true
+				},
+				"source": [
+					"set.seed(123)\n",
+					"train_indices <- sample(1:nrow(mtcars), size = round(nrow(mtcars) * 0.7))\n",
+					"\n",
+					"train_df <- mtcars[train_indices, ]\n",
+					"test_df <- mtcars[-train_indices, ]"
+				],
+				"attachments": null,
+				"execution_count": 3
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"As you can see from the description above, the number of predictive features available in this dataset (10) is comparable to the number of records (22). Such conditions tend to produce overfitted models that give exceptional predictions on their own training data, but poor predictions on the withheld test data. We will see an example of an overfitted model below."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Fit Models\n",
+					"### Linear Model\n",
+					"The following lines of code fit a linear model (without regularization) using all of the original features:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"my_formula <- as.formula(paste(list(colnames(mtcars)[1], paste(colnames(mtcars)[2:11], collapse =' + ')), collapse=' ~ '))\n",
+					"print(my_formula)\n",
+					"fit <- lm(my_formula, data=train_df)\n",
+					"summary(fit)"
+				],
+				"attachments": null,
+				"execution_count": 4
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"The fitted model summary shows a good fit to the training data, but only a few of the model features have strong significance. Let's apply this fitted model to the test dataset and evaluate the results:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"# Create a summary stats function we'll apply for each model\n",
+					"summary_stats <- function(predicted, actual) {\n",
+					"    r_squared <- 1 - (sum((actual - predicted)^2) / sum((actual - mean(actual))^2))\n",
+					"    mae <- mean(abs(predicted - actual))\n",
+					"    rmse <- (mean((predicted - actual)^2))^0.5\n",
+					"    rae <- mean(abs(predicted - actual)) / mean(abs(actual - mean(actual)))\n",
+					"    rse <- mean((predicted - actual)^2) / mean((actual - mean(actual))^2) \n",
+					"    return(c(r_squared, mae, rmse, rae, rse))\n",
+					"}\n",
+					"\n",
+					"summary_df <- data.frame(list(summary_stats(predict(fit, newdata=test_df), test_df[['mpg']])))\n",
+					"colnames(summary_df) = c('Linear regression, all variables')\n",
+					"row.names(summary_df) <- c('R-Squared', 'Mean Absolute Error', 'Root Mean Squared Error',\n",
+					"                           'Relative Absolute Error', 'Relative Squared Error')\n",
+					"summary_df"
+				],
+				"attachments": null,
+				"execution_count": 5
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"Notice that the R-squared value for true vs. predicted `mpg` of the test set is much lower than it was for the training set. (Granted, our test set is not very large, so some fluctuation is expected.) This is indicative of model overfitting."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"### Linear Model with Feature Selection\n",
+					"\n",
+					"One way to reduce overfitting is to remove some predictive features from the model. Ideally we would be able to examine many or all possible subsets of features and select the subset of features that gives the best performance, but that is usually impractical due to the large number of possible subsets. A common alternative is to start from the full list of features and recursively remove one that seems to be contributing least to the model's performance (i.e., the feature whose removal has the least negative/most positive effect on model performance). This process is called recursive feature elimination (RFE).\n",
+					"\n",
+					"RFE fits many models and compares their performance: it therefore requires both training and testing data. We would like to reserve the test dataset we created earlier to fairly compare all models, so RFE will need to set aside some records in the training dataset for its own round of testing. Fortunately, this is easily done using the `caret` package in R. This package will take a moment to install."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"install.packages('caret')\n",
+					"library('caret')\n",
+					"library('plyr')\n",
+					"\n",
+					"# split the features from the field to be predicted; normalize the features\n",
+					"x <- as.matrix(subset(train_df, select =-c(mpg)))\n",
+					"normalization <- preProcess(x)  # train the normalizer\n",
+					"x <- predict(normalization, x)  # apply the normalizer\n",
+					"x <- as.data.frame(x)\n",
+					"y <- train_df[['mpg']]\n",
+					"\n",
+					"# perform the recursive feature elimination\n",
+					"set.seed(123)\n",
+					"ctrl <- rfeControl(functions = lmFuncs,\n",
+					"                   method = \"repeatedcv\",\n",
+					"                   repeats = 5)\n",
+					"lm_rfe_results <- rfe(x, y,\n",
+					"                      sizes = c(1:9),\n",
+					"                      metric = 'Rsquared',\n",
+					"                      rfeControl = rfeControl(functions = lmFuncs,\n",
+					"                                              method = \"repeatedcv\",\n",
+					"                                              repeats = 5))\n",
+					"lm_rfe_results"
+				],
+				"attachments": null,
+				"execution_count": 6
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"We've used the R-squared value as our metric for model quality. The R-squared value is maximized when the model contains three features (this maximum is more easily identified in the plot below):"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"library(ggplot2)\n",
+					"\n",
+					"plot_df = data.frame(list(Features = lm_rfe_results$results$Variables,\n",
+					"                          Rsquared = lm_rfe_results$results$Rsquared))\n",
+					"ggplot(plot_df, aes(x=Features, y=Rsquared)) + geom_line() +\n",
+					"    ylab('R-squared for true vs. predicted \\n mpg in cross-validation') +\n",
+					"    scale_x_continuous(name = 'Number of features in model',\n",
+					"                       breaks=1:10)"
+				],
+				"attachments": null,
+				"execution_count": 7
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"Because the cross-validation dataset size is so small in this example, the maximum at three features may be due to random fluctuations. However, it does appear that including an intermediate number of features gives a better model in general.\n",
+					"\n",
+					"We'll fit a linear model that uses only those three features:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"my_formula_short <- as.formula(paste(list(colnames(mtcars)[1],\n",
+					"                                          paste(lm_rfe_results$optVariables, collapse =' + ')),\n",
+					"                                     collapse=' ~ '))\n",
+					"print(my_formula_short)\n",
+					"fit2 <- lm(my_formula_short, data=train_df)\n",
+					"summary(fit2)"
+				],
+				"attachments": null,
+				"execution_count": 8
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"...and evaluate its performance on the test set:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"summary_df['Linear regression, selected variables'] <- summary_stats(predict(fit2, test_df), test_df[['mpg']])\n",
+					"summary_df"
+				],
+				"attachments": null,
+				"execution_count": 9
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"The model's performance on the withheld test set improved (by all metrics) after the majority of the features were removed."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"### Gradient Boosting Machine Regression Model\n",
+					"\n",
+					"Before fitting the gradient boosting model, we need to estimate some parameters and we'll do this using cross-validation along with grid search. First, we install the necessary package for the gradient boosting machine models:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false,
+					"scrolled": false
+				},
+				"source": [
+					"install.packages('gbm')\n",
+					"library('gbm')"
+				],
+				"attachments": null,
+				"execution_count": 10
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"We set the combinations of parameters to try using the `caret` package function `expand.grid()`, and our cross-validation settings using `trainControl`. We train the gradient boosting machine model using these parameters and the `caret` package function `train()`. This code box may take some time to run because it tries $2^4=16$ parameter combinations and runs through multiple cross-validation rounds."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false,
+					"scrolled": true
+				},
+				"source": [
+					"gbmGrid <-  expand.grid(shrinkage = c(0.01, 0.001),\n",
+					"                        interaction.depth = c(2, 4),\n",
+					"                        n.trees = c(5000, 10000),\n",
+					"                        n.minobsinnode = c(1, 2))\n",
+					"fitControl <- trainControl(method = \"repeatedcv\",\n",
+					"                           number = 5,\n",
+					"                           repeats = 5)\n",
+					"fit3 <- train(my_formula,\n",
+					"              data = train_df,                \n",
+					"              method = \"gbm\",\n",
+					"              trControl = fitControl,\n",
+					"              tuneGrid = gbmGrid,\n",
+					"              verbose = FALSE,\n",
+					"              metric = 'Rsquared')\n",
+					"fit3"
+				],
+				"attachments": null,
+				"execution_count": 11
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"We can now use the model fitted with the optimal parameter combination to predict the gas mileage for test set records:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"summary_df['Gradient boosting machine regression'] <- summary_stats(predict(fit3, newdata=test_df), test_df[['mpg']])\n",
+					"summary_df"
+				],
+				"attachments": null,
+				"execution_count": 12
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"Looks like our gradient boosting machine model did quite well! The plot below shows the importance of each feature:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"# get feature importance information\n",
+					"feature_importance <- varImp(fit3, scale = FALSE)\n",
+					"plot_df <- data.frame(list(name = row.names(feature_importance$importance),\n",
+					"                           importance = feature_importance$importance$Overall))\n",
+					"\n",
+					"# plot the feature importances in descending order\n",
+					"plot_df <- plot_df[with(plot_df, order(-importance)), ]\n",
+					"plot_df$name <- factor(plot_df$name, levels=plot_df$name)\n",
+					"ggplot(plot_df, aes(x=name, y=importance)) + geom_bar(stat='identity') +\n",
+					"    xlab('Feature name') + ylab('Feature importance')"
+				],
+				"attachments": null,
+				"execution_count": 13
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"Notice that the features retained after recursive feature elimination have relatively high feature importance in GBM as well.\n",
+					"\n",
+					"Let's assess whether our GBM model's performance is likely to be limited by the number of estimators used:"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false
+				},
+				"source": [
+					"gbmGrid <-  expand.grid(shrinkage = 0.01,\n",
+					"                        interaction.depth = 2,\n",
+					"                        n.trees = 50 * 1:120,\n",
+					"                        n.minobsinnode = 1)\n",
+					"fit3_trees <- train(my_formula,\n",
+					"                   data = train_df,                \n",
+					"                   method = \"gbm\",\n",
+					"                   trControl = fitControl,\n",
+					"                   tuneGrid = gbmGrid,\n",
+					"                   verbose = FALSE,\n",
+					"                   metric = 'Rsquared')\n",
+					"trellis.par.set(caretTheme())\n",
+					"plot(fit3_trees)"
+				],
+				"attachments": null,
+				"execution_count": 14
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"The quality of the model plateaus after around 2000 iterations, suggesting that model quality would not improve substantially if the number of trees were increased."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Conclusion\n",
+					"The following table compares the performance of the three models. Variable selection using RFE improved the performance of the linear regression model by all metrics. The GBM model performed better still on all metrics, though some differences are small relative to the random fluctuations we might expect with a dataset of this size."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"trusted": false,
+					"scrolled": true
+				},
+				"source": [
+					"summary_df"
+				],
+				"attachments": null,
+				"execution_count": 15
+			}
+		]
+	}
+}

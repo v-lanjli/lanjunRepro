@@ -1,0 +1,16 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "-- type your sql script here, we now have intellisense\nSELECT \nr.filename()  AS [filename]\n, COUNT_BIG(*) AS [rows]\nFROM OPENROWSET(\nBULK'https://partystoragenortheurblob.blob.core.windows.net/csv/taxi/yellow_tripdata_2017-1*.csv',FORMAT='csv',FIRSTROW=2\n)\nWITH(\nvendorid  INT,\npicktime  DATETIME2,\ntripds    FLOAT)\nAS [r]\nGROUP BY\nr.filename()\nORDER BY\n[filename]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "master",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

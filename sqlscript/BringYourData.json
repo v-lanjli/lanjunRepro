@@ -1,0 +1,16 @@
+{
+	"name": "BringYourData",
+	"properties": {
+		"content": {
+			"query": "/* This sample uses COPY command to load data. You can either modify parameters or use BulkCopy utility by right clicking data from storage account to generate this script for loading your own data */\n\n    CREATE TABLE [dbo].[FactOnlineSales]\n    (\n        [OnlineSalesKey] [int] NOT NULL,\n        [DateKey] [datetime] NOT NULL,\n        [StoreKey] [int] NOT NULL,\n        [ProductKey] [int] NOT NULL,\n        [PromotionKey] [int] NOT NULL,\n        [CurrencyKey] [int] NOT NULL,\n        [CustomerKey] [int] NOT NULL,\n        [SalesOrderNumber] [nvarchar](20) NOT NULL,\n        [SalesOrderLineNumber] [int] NULL,\n        [SalesQuantity] [int] NOT NULL,\n        [SalesAmount] [money] NOT NULL,\n        [ReturnQuantity] [int] NOT NULL,\n        [ReturnAmount] [money] NULL,\n        [DiscountQuantity] [int] NULL,\n        [DiscountAmount] [money] NULL,\n        [TotalCost] [money] NOT NULL,\n        [UnitCost] [money] NULL,\n        [UnitPrice] [money] NULL,\n        [ETLLoadID] [int] NULL,\n        [LoadDate] [datetime] NULL,\n        [UpdateDate] [datetime] NULL\n    )\n    WITH\n    (\n        DISTRIBUTION = ROUND_ROBIN,\n        CLUSTERED COLUMNSTORE INDEX\n    )\n    GO\n    \n    COPY INTO FactOnlineSales FROM 'https://contosoretaildw.blob.core.windows.net/contosoretaildw-tables/FactOnlineSales/'\n    WITH (\n       FIELDTERMINATOR='|',\n       DATEFORMAT='ymd',\n       ROWTERMINATOR='0x0A'\n    ) OPTION (LABEL = 'COPY Monitoring2');\n    \n    /* Verify number of rows loaded */\n    select count(*) from FactOnlineSales;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "weis",
+				"type": "SqlPool"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

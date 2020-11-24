@@ -1,0 +1,16 @@
+{
+	"name": "select-script",
+	"properties": {
+		"content": {
+			"query": "\n--count function--\nSELECT COUNT(t2.[OrderNo]) as [OrderCount]\n    FROM [dbo].[persons] as t1 \n    left join [dbo].[orders] as t2 on t1.[Id_P]=t2.[Id_P]\n    WHERE T2.[Id_P]=3\n\n--order by--\nSELECT T1.[Id_P] AS [ip],t1.[LastName],t1.[FirstName],t2.[company] AS [orderclient]\n    FROM [dbo].[persons] as t1 \n    left join [dbo].[orders] as t2 on t1.[Id_P]=t2.[Id_P]\n    ORDER BY T1.[Id_P]\n\n--group by--\nSELECT [orders].[company] AS [clinet]\n    FROM [dbo].[orders] \n    GROUP BY [orders].[company]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "master",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

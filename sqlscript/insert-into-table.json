@@ -1,0 +1,16 @@
+{
+	"name": "insert-into-table",
+	"properties": {
+		"content": {
+			"query": "--insert into dbo.persons--\n\nINSERT INTO [dbo].[persons7] VALUES ('3','Gates', 'Bill', 'Xuanwumen 10', 'Beijing')\nINSERT INTO [dbo].[persons7] VALUES ('2','xiaoqiang', 'wang', 'danlingjie', 'Beijing')\nINSERT INTO [dbo].[persons7] VALUES ('1','maomao', 'dou', 'folower','shenzhen')\nINSERT INTO [dbo].[persons7] VALUES ('4','mike', 'dou', 'folower', 'shenzhen')\nINSERT INTO [dbo].[persons7] VALUES ('5','jack', 'dou', '333', 'shenzhen')\nINSERT INTO [dbo].[persons7] VALUES ('7','amy', 'dou', 'folower13', 'shenzhen')\nINSERT INTO [dbo].[persons7] VALUES ('6','Athena', 'dou', 'folower789', 'shenzhen')\n\n\n--insert into dbo.persons--\nINSERT INTO [dbo].[orders7] VALUES ('1','77895','3','company1','150000')\nINSERT INTO [dbo].[orders7] VALUES ('2','44678','3','company2','200000')\nINSERT INTO [dbo].[orders7] VALUES ('3','22456','1','company3','185000')\nINSERT INTO [dbo].[orders7] VALUES ('4','34765','1','company4','220000')\nINSERT INTO [dbo].[orders7] VALUES ('5','42307','10','company4','120000')\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "master",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

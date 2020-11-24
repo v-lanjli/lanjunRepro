@@ -1,0 +1,154 @@
+{
+	"name": "language test",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "Medium",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/Medium",
+				"name": "Medium",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/Medium",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 8,
+				"memory": 56
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import math\n",
+					"from pyspark.context import SparkContext\n",
+					"import pandas.core.accessor as"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"a = sum(1,2,3)\n",
+					"b = 1.bit_length()\n",
+					"c = spark.range(0)\n",
+					"d = sc.broadcast(1)\n",
+					"\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas.core.accessor as ace\n",
+					"from pyspark.conf import SparkConf\n",
+					"\n",
+					"spa"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"class userDefinedClsA:\n",
+					"    def __init__(self, param1):\n",
+					"        self.param = param1\n",
+					"\n",
+					"    def funcA(self, name):\n",
+					"        return 1\n",
+					"    \n",
+					"    @property\n",
+					"    def propertyA(self):\n",
+					"        return \"test\"\n",
+					"\n",
+					"    @staticmethod\n",
+					"    def staticMethodA():\n",
+					"        return 1\n",
+					"    \n",
+					"    @classmethod\n",
+					"    def classMethodA(cls):\n",
+					"        return \"test\"\n",
+					"\n",
+					"def userDefinedFuncA(name):\n",
+					"    return \"test\"\n",
+					"\n",
+					"userDefinedVariableA = 1\n",
+					""
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"a = userDefinedFuncA.classMethodA().capi\n",
+					"b = userDefinedFuncA.staticMethodA().bit_length()\n",
+					"c = userDefinedFuncA().funcA(name).to\n",
+					"d = userDefinedFuncA().propertyA\n",
+					"e = userDefinedFuncA().param\n",
+					"f = userDefinedFuncA(name).capitalize()\n",
+					"g = userDefinedVariableA.from_bytes()"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"class userDefinedClsA:\n",
+					"    def __init__(self, param1):\n",
+					"        self\n",
+					"        \n",
+					"\n",
+					"\n",
+					"        "
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"a = 1"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"dateFrame = spark.createDataFrame()\n",
+					"dateFrame."
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"data = spark.createDataFrame().cube(c1)\n",
+					"data."
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			}
+		]
+	}
+}

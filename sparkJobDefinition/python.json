@@ -1,0 +1,27 @@
+{
+	"name": "python",
+	"properties": {
+		"targetBigDataPool": {
+			"referenceName": "Medium",
+			"type": "BigDataPoolReference"
+		},
+		"requiredSparkVersion": "2.4",
+		"language": "python",
+		"jobProperties": {
+			"name": "python",
+			"file": "abfss://azureportaldeploy@hozhaogen2.dfs.core.windows.net/synapse/workspaces/bigdataqa0407/batchjobs/python/fileexists.py",
+			"args": [
+				"shakespeare.txt"
+			],
+			"jars": [],
+			"files": [
+				"abfss://azureportaldeploy@hozhaogen2.dfs.core.windows.net/synapse/workspaces/bigdataqa0407/batchjobs/python/shakespeare.txt"
+			],
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 3
+		}
+	}
+}

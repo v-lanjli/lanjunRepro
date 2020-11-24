@@ -1,0 +1,16 @@
+{
+	"name": "create-table",
+	"properties": {
+		"content": {
+			"query": "CREATE TABLE [dbo].[persons7]\n(\n    Id_P INT NOT NULL,\n    LastName varchar(255) NOT NULL,\n    FirstName varchar(255) NOT NULL,\n    Address varchar(255) NOT NULL,\n    City varchar(255) NOT NULL\n)\n\nCREATE TABLE [dbo].[orders7]\n(\n    Id_O INT NOT NULL,\n    OrderNo INT NOT NULL,\n    Id_P INT NOT NULL,\n    Company varchar(255)\n)\n\nGO\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "master",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

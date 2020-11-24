@@ -1,0 +1,16 @@
+{
+	"name": "select from person",
+	"properties": {
+		"content": {
+			"query": "SELECT *\n    FROM [dbo].[persons] \n    ORDER BY [persons].[ID_P]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "master",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

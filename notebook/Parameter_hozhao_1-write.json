@@ -1,0 +1,88 @@
+{
+	"name": "Parameter_hozhao_1-write",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "large",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/large",
+				"name": "large",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/large",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 16,
+				"memory": 112
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"cellLanguage": "python",
+					"tags": [
+						"parameters"
+					]
+				},
+				"source": [
+					"a=1\n",
+					"b=2"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#print(a+b)\n",
+					"df = spark.createDataFrame([(a,b)],['Col_1','Col_2'])\n",
+					"df.show()"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df.write.csv(\"abfss://testzhao@hozhaogen2.dfs.core.windows.net/test/parameterTest.csv\", header=True, mode='overwrite')"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#from pyspark.sql import SparkSession\n",
+					"#from pyspark.sql.types import *\n",
+					"\n",
+					"#spark.conf.set(\"fs.azure.account.auth.type.hozhaogen2.dfs.core.windows.net\", \"SharedKey\")\n",
+					"#spark.conf.set(\"fs.azure.account.key.hozhaogen2.dfs.core.windows.net\",\"ZiG2L5QLPxPMkMzhK/f+NfFTPxSmHXXds6odR5b3icnEEAg5zaDnJxB5drto5Kzbax/QU5jA0qeDgLIBL3UILQ==\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#dfread = spark.read.csv(\"abfss://testzhao@hozhaogen2.dfs.core.windows.net/test/parameterTest.csv\", header=True)\n",
+					"#ddfread.show()"
+				],
+				"execution_count": 7
+			}
+		]
+	}
+}

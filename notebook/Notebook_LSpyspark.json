@@ -1,0 +1,211 @@
+{
+	"name": "Notebook_LSpyspark",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "opendatalarge",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/opendatalarge",
+				"name": "opendatalarge",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/opendatalarge",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 16,
+				"memory": 112
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import sys\r\n",
+					"print(sys.version_info)"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"import pprint\r\n",
+					"import pip\r\n",
+					"installed_packages = pip.get_installed_distributions()\r\n",
+					"installed_packages_list = sorted([\"%s==%s\" % (i.key, i.version)\r\n",
+					"     for i in installed_package\r\n",
+					"pprint.pprint(installed_packages_list)"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
+					"schema = StructType([ StructField(\"City_Key\",IntegerType(),True),\r\n",
+					"StructField(\"City\",StringType(),True),\r\n",
+					"              StructField(\"Latest_Recorded_Population\",LongType(),True),\r\n",
+					"              StructField(\"Valid_From\",DataType(),True),\r\n",
+					"              ])\r\n",
+					"df = spark.read.option(\"header\", \"true\") \\\r\n",
+					"            .option(\"delimiter\",\"|\") \\\r\n",
+					"            .schema(schema) \\\r\n",
+					"            .csv(wasbs_path)\r\n",
+					"print('Register the DataFrame as a SQL temporary view: source')\r\n",
+					"df.show(10, truncate=False)"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"import numpy as np\r\n",
+					"from matplotlib import pyplot as plt\r\n",
+					"np.random.seed(3)\r\n",
+					"x = np.random.randn(250)\r\n",
+					"plt.hist(x)\r\n",
+					"plt.show()"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"x = np.linspace(0, 1, 500)\r\n",
+					"y = np.sin(4 * np.pi * x) * np.exp(-5 * x)\r\n",
+					"fig, ax = plt.subplots()\r\n",
+					"ax.fill(x, y, zorder=10)\r\n",
+					"ax.grid(True, zorder=5)\r\n",
+					"plt.show()"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from mpl_toolkits.mplot3d import axes3d\r\n",
+					"fig = plt.figure()\r\n",
+					"ax = fig.add_subplot(111, projection='3d')\r\n",
+					"X, Y, Z = axes3d.get_test_data(0.05)\r\n",
+					"ax.plot_wireframe(X, Y, Z, rstride=10, cstride=10)\r\n",
+					"plt.show()"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.contrib.opendatasets import NycTlcYellow\r\n",
+					"from datetime import datetime\r\n",
+					"from dateutil import parser\r\n",
+					"end_date = parser.parse('2018-06-06')\r\n",
+					"start_date = parser.parse('2018-06-05')\r\n",
+					"nyc_tlc = NycTlcYellow(start_date=start_date, end_date = end_date)\r\n",
+					"nyc_tlc_df = nyc_tlc.to_spark_dataframe()\r\n",
+					"nyc_tlc_df.limit(5).show()\r\n",
+					"group_df = nyc_tlc_df.groupBy(\"vendorID\")\r\n",
+					"group_df.agg({'passengerCount':'sum'}).show()"
+				],
+				"attachments": null,
+				"execution_count": null
+			}
+		]
+	}
+}

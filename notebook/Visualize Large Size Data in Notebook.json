@@ -1,0 +1,336 @@
+{
+	"name": "Visualize Large Size Data in Notebook",
+	"properties": {
+		"folder": {
+			"name": "test"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "opendata",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "scala"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/opendata",
+				"name": "opendata",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/opendata",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 8,
+				"memory": 56
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"source": [
+					"\n",
+					"## `display(dataframe, [summary=true])`\n",
+					"A tabular results view is provided with the option to create a bar chart, line chart, pie chart, scatter chart, and area chart. You can visualize your data without having to write code. The charts can be customized in the Chart Options.\n",
+					"\n",
+					"You can call `display(df)` on Spark DataFrames to produce the rendered table and charts.\n",
+					"\n",
+					"\n",
+					"*The previous display api will only take the first 2000 rows of the data to render the charts. In many cases, the user's data set will be very large, the previous display api can not support those big-size data visualization scenario.*\n",
+					"\n",
+					"**Three improvements have been done in this release for ```display``` API**:\n",
+					"\n",
+					"1. Can visualize the spark dataframe to various charts based on all over rows by aggregation operation instead of first 2000 rows.\n",
+					"2. Can show spark dataframe summary info as how many columns this dataframe has, what the type of each column is, how many unique values for the specific column, and how many missing values for the spefici column, etc.\n",
+					"3. Can persist the chart view status when re-execute the cell or re-open the notebook.\n",
+					"\n",
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Demo 1: Render chart based on entire dataset with aggreation operation.\n",
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Input data 1: diamonds.csv\n",
+					"\n",
+					"**10** columns and **53940** rows data\n",
+					"\n",
+					"The annual sales records of diamonds\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import org.apache.spark.sql.functions._\n",
+					"\n",
+					"import org.apache.spark.sql.Row\n",
+					"import org.apache.spark.sql.types.{ StructField, StringType, StructType, IntegerType, LongType } \n",
+					"import org.apache.spark.sql.functions.udf\n",
+					"\n",
+					"val adlspath = \"abfss://users@arcadialake.dfs.core.windows.net/ruxu/diamonds.csv\"\n",
+					"\n",
+					"spark.conf.set(\"fs.azure.account.auth.type.arcadialake.dfs.core.windows.net\", \"SharedKey\")\n",
+					"spark.conf.set(\"fs.azure.account.key.arcadialake.dfs.core.windows.net\",\"EWI0w9mAhyvBtczCWogPhJxGH/w3HRLzClnyVkmnvzucYp+N9zYZf5lzd3hHTfGMfyh3Au7Z3TzEy5ufWRoU5w==\")\n",
+					"\n",
+					"def randomInt(start: Int, end:Int): Int = {\n",
+					"  val rnd = new scala.util.Random\n",
+					"  rnd.nextInt((end - start) + 1)\n",
+					"}\n",
+					"val years = Seq(2013, 2014, 2015, 2016, 2017)\n",
+					"\n",
+					"val getYear: Int => Int = (v: Int) => years(randomInt(0, 4))\n",
+					"val myUDF = udf(getYear)\n",
+					"\n",
+					"var diamondDf = spark.read.option(\"header\", \"true\").option(\"delimiter\", \",\").option(\"inferSchema\", \"true\").csv(adlspath).withColumnRenamed(\"price\",\"saleAmount\")\n",
+					"diamondDf = diamondDf.withColumn(\"year\", myUDF(col(\"x\")))\n",
+					"val partitionNum = diamondDf.rdd.getNumPartitions\n",
+					"println(partitionNum)\n",
+					"diamondDf.count() \n",
+					"diamondDf.printSchema() "
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"### A Bar Chart is a classic graph and a great basic way to visualize data.\n",
+					"\n",
+					"The **Key** is Year and appears on the X-Axis.\n",
+					"\n",
+					"The **Values** is salesAmount and appears on the Y-Axis.\n",
+					"\n",
+					"The **Series group** is Color and there is a different color to denote each of those.\n",
+					"\n",
+					"Sum was selected as the aggregation method, which means means sales amounts are summed for each color for that year.\n",
+					"\n",
+					"We now support 5 aggregation method:\n",
+					"**Sum**, **Avg**, **Max**, **Min**, **Count**"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"diagram": {
+						"activateDiagramType": 1,
+						"chartConfig": {
+							"category": "bar",
+							"keys": [
+								"color"
+							],
+							"values": [
+								"avg(saleAmount)"
+							],
+							"yLabel": "avg(saleAmount)",
+							"xLabel": "color",
+							"aggregation": "SUM",
+							"aggByBackend": false
+						},
+						"previewData": {
+							"filter": null
+						},
+						"aggData": "{\"avg(saleAmount)\":{\"D\":3169.9540959409596,\"E\":3076.7524752475247,\"F\":3724.886396981765,\"G\":3999.135671271697,\"H\":4486.669195568401,\"I\":5091.874953891553,\"J\":5323.81801994302}}",
+						"isSummary": false,
+						"isSql": false
+					}
+				},
+				"source": [
+					"display(diamondDf.select(\"color\",\"saleAmount\").groupBy(\"color\").agg(avg(\"saleAmount\")))"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"diagram": {
+						"activateDiagramType": 2,
+						"chartConfig": {
+							"category": "bar",
+							"keys": [
+								"cut"
+							],
+							"values": [
+								"saleAmount"
+							],
+							"yLabel": "saleAmount",
+							"xLabel": "cut",
+							"aggregation": "COUNT",
+							"aggByBackend": true,
+							"series": "color",
+							"isValid": true,
+							"inValidMsg": null,
+							"stacked": false
+						},
+						"previewData": {
+							"filter": null
+						},
+						"aggData": "{\"E\":{\"Very Good\":903,\"Good\":400,\"Premium\":779,\"Ideal\":958,\"Fair\":114},\"J\":{\"Very Good\":317,\"Good\":175,\"Premium\":378,\"Ideal\":394,\"Fair\":64},\"F\":{\"Very Good\":877,\"Good\":409,\"Premium\":916,\"Ideal\":1050,\"Fair\":158},\"I\":{\"Very Good\":498,\"Good\":209,\"Premium\":639,\"Ideal\":768,\"Fair\":85},\"G\":{\"Very Good\":880,\"Good\":423,\"Premium\":1075,\"Ideal\":1393,\"Fair\":136},\"H\":{\"Very Good\":833,\"Good\":330,\"Premium\":1146,\"Ideal\":1192,\"Fair\":165},\"D\":{\"Very Good\":628,\"Good\":336,\"Premium\":572,\"Ideal\":711,\"Fair\":89}}",
+						"isSummary": false,
+						"isSql": false
+					}
+				},
+				"source": [
+					"display(diamondDf.limit(20000))"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Input data 2: Nyc_taxi data \n",
+					"\n",
+					"**21** columns and total **1445285** rows data\n",
+					"\n",
+					"The green taxi order transaction records\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val adlsKey = \"EWI0w9mAhyvBtczCWogPhJxGH/w3HRLzClnyVkmnvzucYp+N9zYZf5lzd3hHTfGMfyh3Au7Z3TzEy5ufWRoU5w==\"\n",
+					"spark.conf.set(\"fs.azure.account.auth.type.arcadialake.dfs.core.windows.net\",\"SharedKey\")\n",
+					"spark.conf.set(\"fs.azure.account.key.arcadialake.dfs.core.windows.net\",adlsKey)"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val adlsAccount = \"arcadialake\" \n",
+					"val adlsContainerName = \"users\"\n",
+					"val adlsRelativePathNycTaxi = \"ruxu/nyc_taxi_csv/green_tripdata_2016-01.csv\"\n",
+					"\n",
+					"val nycTaxiPath = \"abfss://users@arcadialake.dfs.core.windows.net/\" + adlsRelativePathNycTaxi\n",
+					"println(\"Remote adls path: \" + nycTaxiPath)\n",
+					"\n",
+					"var nycTaxiDf = spark.read.option(\"header\", \"true\").option(\"delimiter\", \",\").option(\"inferSchema\", \"true\").csv(nycTaxiPath)\n",
+					"\n",
+					"println(\"partition nums is : \", nycTaxiDf.rdd.getNumPartitions)\n",
+					"println(\"total rows is: \", nycTaxiDf.count)\n",
+					"nycTaxiDf.printSchema"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import org.apache.spark.sql.functions.{ col }\n",
+					"val taxiDf = nycTaxiDf.select(\n",
+					"    col(\"vendorID\"), col(\"Passenger_count\"), col(\"Total_amount\"), col(\"Payment_type\"), col(\"Trip_type \").alias(\"Trip_type\"))"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"diagram": {
+						"activateDiagramType": 2,
+						"chartConfig": {
+							"category": "bar",
+							"keys": [
+								"vendorID"
+							],
+							"values": [
+								"Total_amount"
+							],
+							"yLabel": "Total_amount",
+							"xLabel": "vendorID",
+							"aggregation": "SUM",
+							"aggByBackend": true,
+							"isValid": true,
+							"inValidMsg": null
+						},
+						"previewData": {
+							"filter": null
+						},
+						"aggData": "{\"Total_amount\":{\"1\":4545190.63,\"2\":16293482.79}}",
+						"isSummary": false,
+						"isSql": false
+					}
+				},
+				"source": [
+					"display(taxiDf)"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Demo 2: show spark dataframe summary info \n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"diamondDf.dtypes.map { case (k, v) => k }"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"diagram": {
+						"activateDiagramType": 3,
+						"chartConfig": {
+							"category": "histogram",
+							"keys": [
+								"saleAmount"
+							],
+							"isValid": true,
+							"inValidMsg": null
+						},
+						"previewData": {
+							"filter": null
+						},
+						"aggData": "{\"saleAmount\":{\"2176.00\":25335,\"13276.00\":1308,\"7726.00\":3879,\"18826.00\":725,\"15126.00\":1001,\"9576.00\":2363,\"16976.00\":863,\"4026.00\":9328,\"11426.00\":1745,\"5876.00\":7393}}",
+						"isSummary": true,
+						"summaryInfo": {
+							"name": "saleAmount",
+							"count": 53940,
+							"missing": 0,
+							"type": "int",
+							"unique": 11602
+						},
+						"statistics": {
+							"max": "18823",
+							"min": "326",
+							"mean": "3932.799721913237",
+							"stddev": "3989.439738146397"
+						},
+						"isSql": false
+					}
+				},
+				"source": [
+					"display(diamondDf, summary=true)"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				],
+				"execution_count": 12
+			}
+		]
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"name": "Input_Parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage_hozhaogen2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "part-00003-0f902c27-f981-43c7-96a1-af32621f7286-c000.snappy.parquet",
+				"folderPath": "parquet/parquet-table-651471",
+				"fileSystem": "sparkjob"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "id",
+				"type": "INT64"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

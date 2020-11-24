@@ -1,0 +1,186 @@
+{
+	"name": "Spark Debugging Scala",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "large",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "scala"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/large",
+				"name": "large",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/large",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 16,
+				"memory": 112
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Scenario 1: exception error\n",
+					"## CASE 1: Non-Spark error\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"Console.WriteLine(\"This is C# Code, Non spark code\")"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Scenario2: Has no permission \n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import spark.implicits._\n",
+					"val peopleDF = spark.read.parquet(\"abfss://datasets@contosolake.dfs.core.windows.net/SearchLog/SearchLog.json\")\n",
+					"peopleDF.show()\n",
+					""
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Scenario3: divid by zero\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"var a=100\n",
+					"var b=0\n",
+					"println(a/b)"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Scenario4: file does not exist\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import spark.implicits._\n",
+					"val peopleCSV = spark.read.csv(\"abfss://testzhao@hozhaogen2.dfs.core.windows.net/test/cccccouput.csv/\")\n",
+					"peopleCSV.show()"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Scenario5: file already exist\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val df = spark.read.csv(\"abfss://testzhao@hozhaogen2.dfs.core.windows.net/test/ouput.csv\")\n",
+					"df.show()\n",
+					"df.write.csv(\"abfss://testzhao@hozhaogen2.dfs.core.windows.net/test/ouput.csv\")"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"##  Scenario6: types\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val a=100\n",
+					"val b=\"this is string\"\n",
+					"println(a*b)"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Scenario7: parameter not define\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val a=100\n",
+					"println(a*b)"
+				],
+				"execution_count": 12
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Scenario8: duplicate column header\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"//case class Person(name: String, age: Long)\n",
+					"case class Person(name: String, name: String)\n",
+					"// Encoders are created for case classes\n",
+					"val caseClassDS = Seq(Person(\"Andy\", 32)).toDS()\n",
+					"caseClassDS.show()\n",
+					""
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"## Scenario9: Too many arguments\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"case class Person(name: String, age: Long)\n",
+					"// Encoders are created for case classes\n",
+					"val caseClassDS = Seq(Person(\"Andy\", 32, 45, \"extraColumn\")).toDS()\n",
+					"caseClassDS.show()"
+				],
+				"execution_count": 15
+			}
+		]
+	}
+}

@@ -1,0 +1,246 @@
+{
+	"name": "Magictest_qingqz",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "smalll",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/smalll",
+				"name": "smalll",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/smalll",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"%lsmagic"
+				],
+				"attachments": null,
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"%%time\n",
+					"import time\n",
+					"time.sleep(.3)"
+				],
+				"attachments": null,
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"%%capture --no-stderr out\n",
+					"import sys\n",
+					"\n",
+					"def eprint(*args, **kwargs):\n",
+					"    print(*args, file=sys.stderr, **kwargs)\n",
+					"\n",
+					"print('std\\\\out')\n",
+					"eprint('std\\nerr')"
+				],
+				"attachments": null,
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"out.stdout"
+				],
+				"attachments": null,
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"%%writefile -a new0512/test0512.csv\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232"
+				],
+				"attachments": null,
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"%%writefile -a new0512/test0512.txt\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"test,1\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,232\n",
+					"map,2\n",
+					"cool,10\n",
+					"coolest,23232543534634654747457457456765\n",
+					""
+				],
+				"attachments": null,
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df = spark.read.csv('new0512/test0512.txt')\n",
+					"df.show()"
+				],
+				"attachments": null,
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"df.show()"
+				],
+				"attachments": null,
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"display(df)"
+				],
+				"attachments": null,
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"%time 2**128"
+				],
+				"attachments": null,
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"##from pyspark.sql import SparkSession\n",
+					"##from pyspark.sql.types import *\n",
+					"\n",
+					"##spark.conf.set(\"fs.azure.account.auth.type.hozhaogen2.dfs.core.windows.net\", \"SharedKey\")\n",
+					"##spark.conf.set(\"fs.azure.account.key.hozhaogen2.dfs.core.windows.net\",\"pQVXrAd7itIxJxP0vzkSm2ymNMFw0bFW39ejSLJedfNdVZ1eU2yUidzt5/hXXiLs4e7zlTSxch5jVEMCNNcBvg==\")"
+				],
+				"attachments": null,
+				"execution_count": 12
+			}
+		]
+	}
+}

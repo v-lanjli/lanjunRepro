@@ -1,0 +1,91 @@
+{
+	"name": "Azure Storage read File_1105ws",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "large",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "scala"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/large",
+				"name": "large",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/large",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 16,
+				"memory": 112
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"//read csv\n",
+					"val blob_account_name = \"hozhaogen2\"\n",
+					"val blob_container_name = \"sparkjob\"\n",
+					"val blob_relative_path = \"QingTestFolder/Persons24.csv\"  //sqlscripts_Persons.csv\n",
+					"val wasbs_path = s\"wasbs://${blob_container_name}@${blob_account_name}.blob.core.windows.net/${blob_relative_path}\"\n",
+					"spark.conf.set(\"fs.azure.account.key.hozhaogen2.blob.core.windows.net\" , \"ZiG2L5QLPxPMkMzhK/f+NfFTPxSmHXXds6odR5b3icnEEAg5zaDnJxB5drto5Kzbax/QU5jA0qeDgLIBL3UILQ==\")"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import org.apache.spark.sql._\n",
+					"import org.apache.spark.sql.types._\n",
+					"val customSchema = (new StructType).add(\"Id_P\",IntegerType,true).add(\"LastName\",StringType,true).add(\"FirstName\",StringType,true).add(\"Address\",StringType,true).add(\"City\",StringType,true)"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val readDf = spark.read.option(\"header\", \"true\").option(\"delimiter\",\",\").schema(customSchema).csv(wasbs_path)\n",
+					"readDf.show\n",
+					"\n",
+					"val readDf1 = spark.read.option(\"header\", \"true\").option(\"delimiter\",\",\").schema(customSchema).csv(wasbs_path).groupBy(\"Id_P\").sum()\n",
+					"readDf1.show"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"// Read Json File\n",
+					"val StorageAccount = \"hozhaogen2\"\n",
+					"val AccessKey = \"ZiG2L5QLPxPMkMzhK/f+NfFTPxSmHXXds6odR5b3icnEEAg5zaDnJxB5drto5Kzbax/QU5jA0qeDgLIBL3UILQ==\"\n",
+					"val entrance = \"fs.azure.account.key.\" + StorageAccount + \".blob.core.windows.net\"\n",
+					"spark.conf.set(entrance, AccessKey)"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val path = \"wasbs://sparkjob@hozhaogen2.blob.core.windows.net/QingTestFolder/sqlscripts_Persons.json\"\n",
+					"val df = spark.read.json(path)\n",
+					"df.show()"
+				],
+				"execution_count": 7
+			}
+		]
+	}
+}

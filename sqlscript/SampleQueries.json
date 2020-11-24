@@ -1,0 +1,15 @@
+{
+	"name": "SampleQueries",
+	"properties": {
+		"content": {
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "weis",
+				"type": "SqlPool"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

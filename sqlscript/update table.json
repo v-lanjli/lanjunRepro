@@ -1,0 +1,16 @@
+{
+	"name": "update table",
+	"properties": {
+		"content": {
+			"query": "UPDATE [dbo].[persons] \nSET FirstName = 'wan' \nWHERE ID_P = 5",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "master",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

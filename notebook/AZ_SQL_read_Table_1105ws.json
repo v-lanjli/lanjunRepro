@@ -1,0 +1,67 @@
+{
+	"name": "AZ_SQL_read_Table_1105ws",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "scala"
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val jdbcHostname = \"bigdataqa1105ws.database.windows.net\"  //server name\n",
+					"val jdbcPort = 1433\n",
+					"val jdbcDatabase = \"sqlcompute\"\n",
+					"val jdbcUsername = \"westtestspace.database.windows.net\"\n",
+					"val jdbcPassword = \"zhao/1234\"     \n",
+					"val jdbcUrl = s\"jdbc:sqlserver://${jdbcHostname}:${jdbcPort};database=${jdbcDatabase}\""
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import java.util.Properties\n",
+					"val connectionProperties = new Properties()\n",
+					"connectionProperties.put(\"user\", s\"${jdbcUsername}\")\n",
+					"connectionProperties.put(\"password\", s\"${jdbcPassword}\")"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val driverClass = \"com.microsoft.sqlserver.jdbc.SQLServerDriver\" \n",
+					"connectionProperties.setProperty(\"Driver\", driverClass)\n",
+					"\n",
+					"val readsqldf = spark.read.jdbc(jdbcUrl, \"persons\", connectionProperties) //org.apache.spark.sql.DataFrame   Table persons under Data>Databases>Tables"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"readsqldf.printSchema\n",
+					"\n",
+					"readsqldf.show()"
+				],
+				"execution_count": 7
+			}
+		]
+	}
+}

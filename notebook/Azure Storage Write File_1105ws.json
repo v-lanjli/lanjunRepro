@@ -1,0 +1,69 @@
+{
+	"name": "Azure Storage Write File_1105ws",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "large",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "scala"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/large",
+				"name": "large",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/large",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 16,
+				"memory": 112
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"// Read Json File\n",
+					"// storage account : beijingtestzhao\n",
+					"// Container name ? zhaotest\n",
+					"// Azure Blob Storage Access key: R5MDJQ0MuP4d6/GNMNDO/GdKPAjDEBWEOB5qCALeGsg2VhOuTeV4fNwp0FzaDvZPufwxiH5nwYewZl5zhDD+IQ==\n",
+					"val StorageAccount = \"beijingtestzhao\"\n",
+					"val AccessKey = \"R5MDJQ0MuP4d6/GNMNDO/GdKPAjDEBWEOB5qCALeGsg2VhOuTeV4fNwp0FzaDvZPufwxiH5nwYewZl5zhDD+IQ==\"\n",
+					"val entrance = \"fs.azure.account.key.\" + StorageAccount + \".blob.core.windows.net\"\n",
+					"spark.conf.set(entrance, AccessKey)\n",
+					"\n",
+					"\n",
+					"val path = \"wasbs://zhaotest@beijingtestzhao.blob.core.windows.net/employees.json\"\n",
+					"val df = spark.read.json(path)\n",
+					"df.show()"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"//????DataFrame save to Blob\n",
+					"val employeeRDD = df.rdd\n",
+					"val outputpath = \"/output0407.txt\"   //Each run change a different name\n",
+					"val result = employeeRDD.saveAsTextFile( \"wasbs://zhaotest@beijingtestzhao.blob.core.windows.net\" + outputpath)\n",
+					""
+				],
+				"execution_count": 5
+			}
+		]
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"name": "Pipeline 4",
+	"properties": {
+		"activities": [
+			{
+				"name": "NotebookQP1",
+				"type": "SynapseNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "NotebookQP1",
+						"type": "NotebookReference"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2020-04-16T03:17:14Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

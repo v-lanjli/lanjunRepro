@@ -1,0 +1,285 @@
+{
+	"name": "LanguageTestPython Notebook",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"new_rows = [('CA',22, 45000),(\"WA\",35,65000) ,(\"WA\",50,85000)]\n",
+					"demo_df = spark.createDataFrame(new_rows, ['state', 'age', 'salary'])\n",
+					"demo_df.show()"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"imp"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"demo_df.createOrReplaceTempView('demo_df')\n",
+					"demo_df.write.csv('demo_df', mode='overwrite')\n",
+					"demo_df.write.parquet('abfss://sparkjob@hozhaogen2.dfs.core.windows.net/demo_df', mode='overwrite')\n",
+					""
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"display(spark.sql('SELECT * FROM demo_df'))"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import matplotlib.pyplot as plt\n",
+					"from datetime import datetime\n",
+					"from dateutil import parser\n",
+					"from pyspark.sql.functions import unix_timestamp\n",
+					"from pyspark.sql import SparkSession\n",
+					"from pyspark.sql.types import *\n",
+					"from pyspark.sql.functions import *\n",
+					"from pyspark.ml import Pipeline\n",
+					"from pyspark.ml import PipelineModel\n",
+					"from pyspark.ml.feature import RFormula\n",
+					"from pyspark.ml.feature import OneHotEncoder, StringIndexer, VectorIndexer\n",
+					"from pyspark.ml.classification import LogisticRegression\n",
+					"from pyspark.mllib.evaluation import BinaryClassificationMetrics\n",
+					"from pyspark.ml.evaluation import BinaryClassificationEvaluator\n",
+					"\n",
+					"adls_key = \"EWI0w9mAhyvBtczCWogPhJxGH/w3HRLzClnyVkmnvzucYp+N9zYZf5lzd3hHTfGMfyh3Au7Z3TzEy5ufWRoU5w==\"\n",
+					"spark.conf.set(\"fs.azure.account.auth.type.arcadialake.dfs.core.windows.net\",\"SharedKey\")\n",
+					"spark.conf.set(\"fs.azure.account.key.arcadialake.dfs.core.windows.net\",adls_key)\n",
+					"\n",
+					"adls_account = \"arcadialake\" \n",
+					"adls_container_name = \"users\"\n",
+					"adls_relative_path_sampled_taxi = \"ruxu/sampled_taxi/\"\n",
+					"\n",
+					"sampled_taxi_path = 'abfss://%s@%s.dfs.core.windows.net/%s' % (adls_container_name, adls_account, adls_relative_path_sampled_taxi)\n",
+					"print('Remote adls path: ' + sampled_taxi_path)\n",
+					"\n",
+					"sampled_taxi_df = spark.read.parquet(sampled_taxi_path)\n",
+					"\n",
+					"sampled_taxi_pd_df = sampled_taxi_df.toPandas()\n",
+					"\n",
+					"ax1 = sampled_taxi_pd_df['tipAmount'].plot(kind='hist', bins=25, facecolor='lightblue')\n",
+					"ax1.set_title('Tip amount distribution')\n",
+					"ax1.set_xlabel('Tip Amount ($)')\n",
+					"ax1.set_ylabel('Counts')\n",
+					"plt.suptitle('')\n",
+					"plt.show()\n",
+					"\n",
+					"ax2 = sampled_taxi_pd_df.boxplot(column=['tipAmount'], by=['passengerCount'])\n",
+					"ax2.set_title('Tip amount by Passenger count')\n",
+					"ax2.set_xlabel('Passenger count') \n",
+					"ax2.set_ylabel('Tip Amount ($)')\n",
+					"plt.suptitle('')\n",
+					"plt.show()\n",
+					"\n",
+					"\n",
+					"ax = sampled_taxi_pd_df.plot(kind='scatter', x= 'fareAmount', y = 'tipAmount', c='blue', alpha = 0.10, s=2.5*(sampled_taxi_pd_df['passengerCount']))\n",
+					"ax.set_title('Tip amount by Fare amount')\n",
+					"ax.set_xlabel('Fare Amount ($)')\n",
+					"ax.set_ylabel('Tip Amount ($)')\n",
+					"plt.axis([-2, 80, -2, 20])\n",
+					"plt.suptitle('')\n",
+					"plt.shwo()\n",
+					"\n",
+					"taxi_df = sampled_taxi_df.select('totalAmount', 'fareAmount', 'tipAmount', 'paymentType', 'rateCodeId', 'passengerCount'\\\n",
+					"                                , 'tripDistance', 'tpepPickupDateTime', 'tpepDropoffDateTime'\\\n",
+					"                                , date_format('tpepPickupDateTime', 'hh').alias('pickupHour')\\\n",
+					"                                , date_format('tpepPickupDateTime', 'EEEE').alias('weekdayString')\\\n",
+					"                                , (unix_timestamp(col('tpepDropoffDateTime')) - unix_timestamp(col('tpepPickupDateTime'))).alias('tripTimeSecs')\\\n",
+					"                                , (when(col('tipAmount') > 0, 1).otherwise(0)).alias('tipped')\n",
+					"                                )\\\n",
+					"                        .filter((sampled_taxi_df.passengerCount > 0) & (sampled_taxi_df.passengerCount < 8)\\\n",
+					"                                & (sampled_taxi_df.tipAmount >= 0) & (sampled_taxi_df.tipAmount <= 25)\\\n",
+					"                                & (sampled_taxi_df.fareAmount >= 1) & (sampled_taxi_df.fareAmount <= 250)\\\n",
+					"                                & (sampled_taxi_df.tipAmount < sampled_taxi_df.fareAmount)\\\n",
+					"                                & (sampled_taxi_df.tripDistance > 0) & (sampled_taxi_df.tripDistance <= 100)\\\n",
+					"                                & (sampled_taxi_df.rateCodeId <= 5)\n",
+					"                                & (sampled_taxi_df.paymentType.isin({\"1\", \"2\"}))\n",
+					"                                ) \n",
+					"\n",
+					"taxi_featurised_df = taxi_df.select('totalAmount', 'fareAmount', 'tipAmount', 'paymentType', 'passengerCount'\\\n",
+					"                                                , 'tripDistance', 'weekdayString', 'pickupHour','tripTimeSecs','tipped'\\\n",
+					"                                                , when((taxi_df.pickupHour <= 6) | (taxi_df.pickupHour >= 20),\"Night\")\\\n",
+					"                                                .when((taxi_df.pickupHour >= 7) & (taxi_df.pickupHour <= 10), \"AMRush\")\\\n",
+					"                                                .when((taxi_df.pickupHour >= 11) & (taxi_df.pickupHour <= 15), \"Afternoon\")\\\n",
+					"                                                .when((taxi_df.pickupHour >= 16) & (taxi_df.pickupHour <= 19), \"PMRush\")\\\n",
+					"                                                .otherwise(0).alias('trafficTimeBins')\n",
+					"                                              )\\\n",
+					"                                       .filter((taxi_df.tripTimeSecs >= 30) & (taxi_df.tripTimeSecs <= 7200))  \n",
+					"\n",
+					"sI1 = StringIndexer(inputCol=\"trafficTimeBins\", outputCol=\"trafficTimeBinsIndex\"); \n",
+					"en1 = OneHotEncoder(dropLast=False, inputCol=\"trafficTimeBinsIndex\", outputCol=\"trafficTimeBinsVec\");\n",
+					"sI2 = StringIndexer(inputCol=\"weekdayString\", outputCol=\"weekdayIndex\"); \n",
+					"en2 = OneHotEncoder(dropLast=False, inputCol=\"weekdayIndex\", outputCol=\"weekdayVec\");\n",
+					"\n",
+					"encoded_final_df = Pipeline(stages=[sI1, en1, sI2, en2]).fit(taxi_featurised_df).transform(taxi_featurised_df)\n",
+					"\n",
+					"trainingFraction = 0.7\n",
+					"testingFraction = (1-trainingFraction)\n",
+					"seed = 1234\n",
+					"train_data_df, test_data_df = encoded_final_df.randomSplit([trainingFraction, testingFraction], seed=seed)\n",
+					"logReg = LogisticRegression(maxIter=10, regParam=0.3, labelCol = 'tipped')\n",
+					"classFormula = RFormula(formula=\"tipped ~ pickupHour + weekdayVec + passengerCount + tripTimeSecs + tripDistance + fareAmount + paymentType+ trafficTimeBinsVec\")\n",
+					"lrModel = Pipeline(stages=[classFormula, logReg]).fit(train_data_df)\n",
+					"datestamp = datetime.now().strftime('%m-%d-%Y-%s');\n",
+					"fileName = \"lrModel_\" + datestamp;\n",
+					"logRegDirfilename = fileName;\n",
+					"lrModel.save(logRegDirfilename)\n",
+					"\n",
+					"\n",
+					"predictions = lrModel.transform(test_data_df)\n",
+					"predictionAndLabels = predictions.select(\"label\",\"prediction\").rdd\n",
+					"metrics = BinaryClassificationMetrics(predictionAndLabels)\n",
+					"print(\"Area under ROC = %s\" % metrics.areaUnderROC)\n",
+					"\n",
+					"modelSummary = lrModel.stages[-1].summary\n",
+					"\n",
+					"plt.plot([0, 1], [0, 1], 'r--')\n",
+					"plt.plot(modelSummary.roc.select('FPR').collect(),modelSummary.roc.select('TPR').collect())\n",
+					"plt.xlabel('False Positive Rate')\n",
+					"plt.ylabel('True Positive Rate')\n",
+					"plt.show()\n",
+					"\n",
+					""
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import sys\n",
+					"print(sys.version_info)"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import pprint\n",
+					"import pip\n",
+					"installed_packages = pip.get_installed_distributions()\n",
+					"installed_packages_list = sorted([\"%s==%s\" % (i.key, i.version)\n",
+					"     for i in installed_packages])\n",
+					"pprint.pprint(installed_packages_list)\n",
+					""
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql import SparkSession\n",
+					"from pyspark.sql.types import *\n",
+					"schema = StructType([ StructField(\"City_Key\",IntegerType(),True),\n",
+					"StructField(\"City\",StringType(),True),\n",
+					"              StructField(\"Latest_Recorded_Population\",LongType(),True),\n",
+					"              StructField(\"Valid_From\",DateType(),True),\n",
+					"              ])\n",
+					"df = spark.read.option(\"header\", \"true\") \\\n",
+					"            .option(\"delimiter\",\"|\") \\\n",
+					"            .schema(schema) \\\n",
+					"            .csv(wasbs_path)\n",
+					"print('Register the DataFrame as a SQL temporary view: source')\n",
+					"df.show(10, truncate=False)\n",
+					""
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import numpy as np\n",
+					"from matplotlib import pyplot as plt\n",
+					"np.random.seed(3)\n",
+					"x = np.random.randn(250)\n",
+					"plt.hist(x)\n",
+					"plt.show()\n",
+					""
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import numpy as np\n",
+					"import matplotlib.pyplot as plt\n",
+					"x = np.linspace(0, 1, 500)\n",
+					"y = np.sin(4 * np.pi * x) * np.exp(-5 * x)\n",
+					"fig, ax = plt.subplots()\n",
+					"ax.fill(x, y, zorder=10)\n",
+					"ax.grid(True, zorder=5)\n",
+					"plt.show()"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from mpl_toolkits.mplot3d import axes3d\n",
+					"fig = plt.figure()\n",
+					"ax = fig.add_subplot(111, projection='3d')\n",
+					"X, Y, Z = axes3d.get_test_data(0.05)\n",
+					"ax.plot_wireframe(X, Y, Z, rstride=10, cstride=10)\n",
+					"plt.show()\n",
+					""
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from azureml.contrib.opendatasets import NycTlcYellow\n",
+					"from datetime import datetime\n",
+					"from dateutil import parser\n",
+					"end_date = parser.parse('2018-06-06')\n",
+					"start_date = parser.parse('2018-06-05')\n",
+					"nyc_tlc = NycTlcYellow(start_date=start_date, end_date=end_date)\n",
+					"nyc_tlc_df = nyc_tlc.to_spark_dataframe()\n",
+					"nyc_tlc_df.limit(5).show()\n",
+					"group_df = nyc_tlc_df.groupBy(\"vendorID\")\n",
+					"group_df.agg({'passengerCount':'sum'}).show()\n",
+					""
+				],
+				"execution_count": 9
+			}
+		]
+	}
+}

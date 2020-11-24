@@ -1,0 +1,192 @@
+{
+	"name": "scala-nb-join-wasb-and-sqlcompute",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "opendatalarge",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "scala"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Synapse/workspaces/bigdataqa0407/bigDataPools/opendatalarge",
+				"name": "opendatalarge",
+				"type": "Spark",
+				"endpoint": "https://bigdataqa0407.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/opendatalarge",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 16,
+				"memory": 112
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Summary\n",
+					"Analyze two datasets from different sources and load the result into a new SQL Compute table (Scala)\n",
+					"This scenario is probably the most interesting one because it illustrates the key role that Spark plays as the playmaker (in the US quarterback) engine in Arcadia. That is a simple analysis of analyzing two different data sources and format with Spark and loading the results of that analysis into a SQL Compute tables. \n",
+					"\n",
+					"Data Source #1 is the blob storage account that contains the Wideworldimporters data. Data Source #2 is a table in the SQL Compute that has been loaded with data through the ‘Analyze with SLQ Compute’ tutorial."
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Cell 1 - define the path of the blob store account to retrieve data"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val blob_account_name = \"datasetarcadia\"\n",
+					"val blob_container_name = \"wideworldimporters\"\n",
+					"val blob_relative_path = \"dimension_Customer/\"\n",
+					"val blob_sas_token = s\"?sv=2018-03-28&ss=bfqt&srt=sco&sp=rwdlacup&se=2019-07-13T07:32:42Z&st=2019-07-09T23:32:42Z&spr=https&sig=iVpGfb5yLi3pskn3%2Bl%2B1S3SQODcndTHyAhR5W5c7OYM%3D\"\n",
+					"val wasbs_path = s\"wasbs://${blob_container_name}@${blob_account_name}.blob.core.windows.net/${blob_relative_path}\"\n",
+					"spark.conf.set(\"fs.azure.account.key.datasetarcadia.blob.core.windows.net\" , \"k2wTXor/8YikczxgvK2RqcHq3iat7jE2WMxaTXHOfgpluoKlVOjwUjpDKE3xP+Blymx6Ba/VSPSVw33SZqKTyw==\")"
+				],
+				"attachments": null,
+				"execution_count": 1
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Cell 2: define the schema "
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import org.apache.spark.sql._\n",
+					"import org.apache.spark.sql.types._\n",
+					"val customSchema = (new StructType).add(\"Customer_Key\",IntegerType,true).add(\"WWI_Customer_ID\",IntegerType,true).add(\"Customer\",StringType,true).add(\"Bill_To_Customer\",StringType,true).add(\"Category\",StringType,true).add(\"Buying_Group\",StringType,true).add(\"Primary_Contact\",StringType,true).add(\"Postal_Code\",IntegerType,true).add(\"Valid_From\",DateType,true).add(\"Valid_To\",DateType,true).add(\"Lineage_Key\",IntegerType,true)"
+				],
+				"attachments": null,
+				"execution_count": 3
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Cell 3:  load the customer dimension files"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val dimcustomer = spark.read.option(\"header\", \"true\").option(\"delimiter\",\"|\").schema(customSchema).csv(wasbs_path)\n",
+					"dimcustomer.show()"
+				],
+				"attachments": null,
+				"execution_count": 4
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Cell 4: set all the properties and path towards the SQL Compute you want to access"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"Class.forName(\"com.microsoft.sqlserver.jdbc.SQLServerDriver\")\n",
+					"\n",
+					"val jdbcHostname = \" arcadiaworkspace.database.windows.net\"\n",
+					"val jdbcPort = 1433\n",
+					"val jdbcDatabase = \"arcadiadb\"\n",
+					"val jdbcUsername = \" sparkarcadia\"\n",
+					"val jdbcPassword = \"340$Uuxwp7Mcxo7Khy\"\n",
+					"\n",
+					"// Create the JDBC URL without passing in the user and password parameters.\n",
+					"val jdbcUrl = s\"jdbc:sqlserver://${jdbcHostname}:${jdbcPort};database=${jdbcDatabase}\"\n",
+					"\n",
+					"// Create a Properties() object to hold the parameters.\n",
+					"import java.util.Properties\n",
+					"val connectionProperties = new Properties()\n",
+					"\n",
+					"connectionProperties.put(\"user\", s\"${jdbcUsername}\")\n",
+					"connectionProperties.put(\"password\", s\"${jdbcPassword}\")"
+				],
+				"attachments": null,
+				"execution_count": 5
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Cell 5: load the fact table into a dataframe with an aggregate based on the Customer Key and an order by descending importance"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val facttx = spark.read\n",
+					".jdbc(jdbcUrl, \"wwi.fact_Transaction\", connectionProperties)\n",
+					".groupBy(\"Customer Key\").sum()\n",
+					".orderBy(desc(\"sum(Total Excluding Tax)\"))"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Cell 6: Join the two tables based on two columns whose names are different (Customer Key)"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val result = facttx.as('a)\n",
+					".join(dimcustomer.as('b),$\"a.Customer Key\" === $\"b.Customer_Key\",joinType=\"left\")\n",
+					".groupBy(\"Customer\").sum()\n",
+					".select(\"Customer\",\"sum(sum(Total Excluding Tax))\")\n",
+					"result.show()"
+				],
+				"attachments": null,
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"source": [
+					"# Cell 7:  Load the data into a new SQL Compute table and define the column data type\n",
+					"Note: If you load directly a dataframe that includes a column as a string type into SQL Compute, the operation will fail"
+				],
+				"attachments": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"connectionProperties.setProperty(\"Driver\", driverClass)\n",
+					"result.write.option(\"createTableColumnTypes\", \"Customer varchar(80), Sales decimal(18,2)\").jdbc(jdbcUrl,\"dbo.sales_buyinggroup\", connectionProperties)"
+				],
+				"attachments": null,
+				"execution_count": null
+			}
+		]
+	}
+}
