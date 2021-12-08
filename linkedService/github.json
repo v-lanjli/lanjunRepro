@@ -1,0 +1,10 @@
+{
+	"name": "github",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://msqinzhaokeyvaultest.vault.azure.net/"
+		}
+	}
+}
