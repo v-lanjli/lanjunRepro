@@ -1,0 +1,11 @@
+{
+	"name": "test",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://a365-keyvault.vault.azure.net/"
+		}
+	}
+}
