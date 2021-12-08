@@ -167,29 +167,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/lanjun_github')]",
-			"type": "Microsoft.Synapse/workspaces/credentials",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"type": "ServicePrincipal",
-				"typeProperties": {
-					"tenant": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-					"servicePrincipalId": "3ffc0059-f87c-43a1-8ccd-333dc28fe776",
-					"servicePrincipalKey": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "github",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "msqinzhaokeyvaultsecret"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/github')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/lanjun_github_sparkpool')]",
 			"type": "Microsoft.Synapse/workspaces/credentials",
 			"apiVersion": "2019-06-01-preview",
