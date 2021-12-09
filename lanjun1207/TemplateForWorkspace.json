@@ -15,6 +15,10 @@
 			"type": "string",
 			"defaultValue": "https://msqinzhaokeyvaultest.vault.azure.net/"
 		},
+		"github_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://msqinzhaokeyvaultest.vault.azure.net/"
+		},
 		"lanjun1207-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://1012.dfs.core.windows.net"
@@ -22,10 +26,6 @@
 		"test_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://a365-keyvault.vault.azure.net/"
-		},
-		"github_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://msqinzhaokeyvaultest.vault.azure.net/"
 		}
 	},
 	"variables": {
@@ -41,6 +41,19 @@
 				"type": "AzureKeyVault",
 				"typeProperties": {
 					"baseUrl": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/github')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('github_properties_typeProperties_baseUrl')]"
 				}
 			},
 			"dependsOn": []
@@ -131,6 +144,30 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/lanjun_github_sparkpool')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "update",
+				"type": "ServicePrincipal",
+				"typeProperties": {
+					"tenant": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+					"servicePrincipalId": "3ffc0059-f87c-43a1-8ccd-333dc28fe776",
+					"servicePrincipalKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "github",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "msqinzhaokeyvaultsecret"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/github')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/lanjuntest1')]",
 			"type": "Microsoft.Synapse/workspaces/credentials",
 			"apiVersion": "2019-06-01-preview",
@@ -154,41 +191,16 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/github')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('github_properties_typeProperties_baseUrl')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/lanjun_github_sparkpool')]",
+			"name": "[concat(parameters('workspaceName'), '/assigned_github')]",
 			"type": "Microsoft.Synapse/workspaces/credentials",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"description": "update",
-				"type": "ServicePrincipal",
+				"type": "ManagedIdentity",
 				"typeProperties": {
-					"tenant": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-					"servicePrincipalId": "3ffc0059-f87c-43a1-8ccd-333dc28fe776",
-					"servicePrincipalKey": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "github",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "msqinzhaokeyvaultsecret"
-					}
+					"resourceId": "/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourcegroups/bigdataqa/providers/Microsoft.ManagedIdentity/userAssignedIdentities/lanjunManagedl"
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/github')]"
-			]
+			"dependsOn": []
 		}
 	]
 }
